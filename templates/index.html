@@ -1,0 +1,94 @@
+{% extends 'site_template.html' %}
+
+{% block imports %}
+    <link href="../static/css/my_css/search.css" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                {% if '[ERROR]' in message %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+
+    <form id="search-form" action="/search" method="get">
+        <div id="page-wrapper-search">
+            <div class="container">
+                <div class="search-logo">
+                    atri <img src="../static/img/icon.svg" alt="Project logo" class="project-icon">
+                </div>
+                <div class="row height d-flex justify-content-center align-items-center">
+                    <div class="col-md-8">
+                        <div class="search">
+                            <i class="fa fa-search"></i>
+                            <input name="keywords" type="text" class="form-control" value="{{ keywords }}"
+                                   placeholder="Create your query here">
+                            {% set macro = macro_collections()%}
+                            {% if not macro %}
+                                <div class="alert alert-info" role="alert">
+                                    You don't have a collection to make queries. Create one <a
+                                        href="/collection/register">here</a>.
+                                </div>
+                            {% else %}
+                                <select id="collection" form="search-form" name="collection" class="form-control">
+                                    {% if collection_name==null %}
+                                        <option selected="selected" disabled> Corpus</option>
+                                    {% endif %}
+                                    {% for collection in macro %}
+                                        {% if collection_name==collection.name %}
+                                            <option value="{{ collection.name }}" selected>
+                                                {{ collection.name }}
+                                            </option>
+                                        {% else %}
+                                            <option value="{{ collection.name }}">
+                                                {{ collection.name }}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                            <button class="btn btn-primary" type="submit">Search</button>
+                            {% if collection_name %}
+                                <button id="cog" class="btn btn-primary" type="button" data-bs-toggle="modal"
+                                        data-bs-target="#advancedSearchModal" data-target="#advancedSearch"
+                                        aria-expanded="false" aria-controls="collapseExample"
+                                        data-url="/collection/{{ collection_name }}/defaults">
+                                    <i class="fa fa-cog"></i>
+                                </button>
+                           {% else %}
+                                <button id="cog" class="btn btn-primary" type="button" data-bs-toggle="modal"
+                                        data-bs-target="#advancedSearchModal" disabled>
+                                    <i class="fa fa-cog"></i>
+                                </button>
+                           {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <center> Or search with a file <a class="beauty-link" href="/search/file">here</a></center>
+        </div>
+        <!--Advanced Config-->
+        <div class="advanced-exhibition">
+            {% include "advanced.html" %}
+        </div>
+    </form>
+
+
+{% endblock %}
+
+{% block footer %}
+
+    <script src="../static/js/my_js/index.js"></script>
+
+{% endblock %}

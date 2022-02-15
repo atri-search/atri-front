@@ -1,0 +1,108 @@
+<div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped">
+        <thead>
+        <tr>
+            <th>File name</th>
+            <th>Size (KB)</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for file in files %}
+            <tr>
+                <td>{{ file["name"] }}</td>
+                <td>{{ file["size"] }}</td>
+                <td>
+                    <button title="Show" class="btn-show-file btn btn-sm btn-primary"
+                            data-url="/collection/{{ collection['name'] }}/{{ file.name }}">View
+                    </button>
+                    <button title="Remove" class="btn-delete-file btn btn-danger fa fa-times"
+                            data-url="/collection/{{ collection['name'] }}/{{ file.name }}"></button>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if not files %}
+        Empty Collection
+    {% else %}
+
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                {% if current_page != 1 %}
+                    <li class="page-item">
+                        <a class="btn-go-to-page page-link"
+                           data-url="/collection/{{ collection['name'] }}/page/{{ current_page - 1 }}">Previous
+                        </a>
+                    </li>
+                {% endif %}
+                {% if total_pages > 10 %}
+                    {% if current_page - 10 > 1 %}
+                        <li class="page-item">
+                            <a class="btn-go-to-page page-link"
+                               data-url="/collection/{{ collection['name'] }}/page/1">{{ 1 }}
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn-go-to-page page-link"
+                            style="pointer-events: none" disabled>...
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% for p in range(current_page - 5 if current_page - 5 > 1 else 1, current_page + 5 if current_page + 5 < total_pages else  total_pages) %}
+                        {% if p == current_page %}
+                            <li class="page-item active">
+                                <a class="btn-go-to-page page-link"
+                                data-url="/collection/{{ collection['name'] }}/page/{{ current_page }}">{{ p }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li>
+                                <a class="btn-go-to-page page-link"
+                                data-url="/collection/{{ collection['name'] }}/page/{{ p }}">{{ p }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if current_page + 10 < total_pages %}
+                        <li>
+                            <a class="btn-go-to-page page-link"
+                            style="pointer-events: none" disabled>...
+                            </a>
+                        </li>
+                        <li>
+                            <a class="btn-go-to-page page-link"
+                            data-url="/collection/{{ collection['name'] }}/page/{{ total_pages }}">{{ total_pages }}
+                            </a>
+                        </li>
+                    {% endif %}
+
+                {% else %}
+                    {% for p in range(1, total_pages + 1) %}
+                        {% if p == current_page %}
+                            <li class="page-item active">
+                                <a class="btn-go-to-page page-link"
+                                data-url="/collection/{{ collection['name'] }}/page/{{ current_page }}">{{ p }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li>
+                                <a class="btn-go-to-page page-link"
+                                data-url="/collection/{{ collection['name'] }}/page/{{ p }}">{{ p }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if current_page != total_pages %}
+                    <li class="page-item">
+                        <a class="btn-go-to-page page-link"
+                        data-url="/collection/{{ collection['name'] }}/page/{{ current_page  + 1}}">Next
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+    {% endif %}
+</div>

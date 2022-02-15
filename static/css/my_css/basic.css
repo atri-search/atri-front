@@ -1,0 +1,162 @@
+:root {
+    --main-color: #65579C;
+    --dark-color: #443B69;
+    --black-color: #3f3c3c;
+    --light-color: #CEC8E8;
+    --contrast-color: #6a5f8e;
+    
+    --secondary-color: #E8D099;
+    --tertiary-color: #BFE86B;
+
+    --font-primary: 'Inconsolata', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    --font-code: 'IBM Plex Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+     /* Colors */
+    --color-back: #fff;
+    --color-front: #1a1e24;
+    --color-subtle: #dfdfdf;
+    --color-paper: #fff;
+
+    --color-red-text: hsl(346, 84%, 45%);
+    --color-red-transparent: hsla(346, 84%, 61%, 0.11);
+    --color-green-text: hsl(108, 66%, 38%);
+    --color-green-transparent: hsla(108, 66%, 63%, 0.11);
+
+     /* Theme */
+    --color-theme-dark: #443B69;
+    --color-theme-base: #65579C;
+    --color-theme-smooth: #CEC8E8;
+    --color-theme-dark-subtle: #6a5f8e;
+    --color-theme-contrast: #fff;
+
+    --color-theme-primary: #65579C;
+    --color-theme-primary-light: #E8D099;
+
+    --color-theme-secondary: #BFE86B;
+
+    --color-code: rgba(240, 239, 249, 0.9);
+    --color-theme-gradient-light: linear-gradient(to right, var(--color-theme-primary-light), var(--color-theme-secondary));
+    --color-theme-gradient-dark: linear-gradient(to right, #c33a8a, #ff5da2);
+
+    --color-default-light: rgba(240, 239, 249, 0.9);
+    --color-default-medium: #483597;
+    --color-default-code: #eae5f9;
+
+    --color-warning-light: hsl(46, 100%, 95%);
+    --color-warning-medium: hsl(45, 90%, 55%);
+    --color-warning-code: hsla(44, 100%, 97%, 0.151);
+
+    --color-danger-light: hsl(355, 100%, 96%);
+    --color-danger-medium: hsl(346, 84%, 61%);
+    --color-danger-code: hsl(355, 100%, 98%);
+}
+
+body {
+  font-family: var(--font-primary);
+  color: #777;
+}
+
+::-moz-selection { /* Code for Firefox */
+    color: var(--black-color);
+    background: var(--light-color);
+  }
+  
+  ::selection {
+    color: var(--black-color);
+    background: var(--light-color);
+  }
+
+.navbar-inverse .navbar-nav > li > a {
+    color: var(--black-color) !important;
+}
+
+.navbar-inverse .navbar-collapse, .navbar-inverse .navbar-form {
+    background-color: var(--dark-color)!important;
+    border-color: var(--dark-color)!important;
+}
+
+.navbar-inverse {
+    background-color: var(--dark-color)!important;
+    border-color: var(--dark-color)!important;
+}
+
+.top-nav>li>a:hover, .top-nav>li>a:focus, .top-nav>.open>a, .top-nav>.open>a:hover, .top-nav>.open>a:focus{
+    background-color: var(--main-color)!important;
+}
+
+.navbar-inverse .navbar-toggle{
+    border-color: var(--dark-color)!important;
+}
+
+.navbar-inverse .navbar-toggle:hover, .navbar-inverse .navbar-toggle:focus{
+    background-color: #252225!important;
+}
+
+.atri {
+    font-family: 'arciform_sansregular';
+    color: white !important; /* blue colors for links too */
+  	text-decoration: inherit; /* no underline */  
+}
+
+.atri:hover{
+	color: inherit; /* blue colors for links too */
+	text-decoration: inherit; /* no underline */  
+}
+
+
+.atri-default {
+    color: var(--main-color)!important;
+}
+
+.atri-light {
+    color: white!important;
+}
+.atri-dark{
+    color: var(--dark-color);
+}
+
+.atri-title {
+    font-family: 'arciform_sansregular';
+    color: var(--main-color)!important;
+    font-size: 60px;
+}
+
+.atri-title-search {
+    font-family: 'arciform_sansregular';
+    color: var(--main-color)!important;
+    font-size: 60px;
+    text-align: center;
+    height: 100px;
+}
+
+.top-nav>li>a{
+    color: white!important;
+}
+
+.side-nav {
+    background-color: white!important;
+}
+
+.side-nav li a:hover, .side-nav li a:focus{
+    background-color: #c567d0!important;
+}
+
+body {
+    background: white;
+}
+
+.notfound {
+  max-width: 710px;
+  width: 100%;
+  padding-left: 190px;
+  padding-top: 192px;
+  line-height: 1.4;
+}
+
+.btn-inactive{
+    display: none;
+}
+
+.fa-times{
+    color: red!important;
+}

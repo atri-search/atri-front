@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:,">
+
+    {% block imports %}
+    {% endblock %}
+
+    <title>atri</title>
+
+    <link
+            href="https://fonts.googleapis.com/css?family=Inconsolata:300,300i,400,400i,600,600i,700,700i|Lato:400,300,700,900"
+            rel="stylesheet">
+    <link
+            href="https://fonts.googleapis.com/css?family=IBM Plex Mono:300,300i,400,400i,600,600i,700,700i|Lato:400,300,700,900"
+            rel="stylesheet">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
+          integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.css">
+
+    <link href="../static/css/my_css/basic_v2.css" rel="stylesheet" type="text/css">
+    <link href="../static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-light bg-light p-3">
+    <div class="d-flex col-12 col-md-3 col-lg-2 mb-2 mb-lg-0 flex-wrap flex-md-nowrap justify-content-between">
+        <div class="logo me-auto">
+            <a class="navbar-brand" href="/">
+                <img src="../static/img/logo.png" alt="" class="img-fluid">
+            </a>
+        </div>
+        <button class="navbar-toggler d-md-none collapsed mb-3" type="button" data-toggle="collapse"
+                data-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="col-12 col-md-5 col-lg-8 d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
+        <div class="mr-3 mt-1">
+            <a class="github-button" href="https://github.com/atri-ir/atri"
+               data-color-scheme="no-preference: dark; light: light; dark: light;" data-icon="octicon-star"
+               data-size="large" data-show-count="true"
+               aria-label="Star /themesberg/simple-bootstrap-5-dashboard">Star</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="/">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                            <span class="ml-2">Search Tool</span>
+                        </a>
+                    </li>
+                    <li class="nav-item has-submenu">
+                        <a class="nav-link" href="/">
+                            <i class="fa fa-fw fa-database"></i>
+                            <span class="ml-2">Collections <i class="fa fa-fw fa-angle-down"></i></span>
+                        </a>
+                        <ul class="submenu collapse">
+                            {% for collection in macro_collections() %}
+                                <li>
+                                    <a class="nav-link" href="/collection/{{ collection.name }}">□ {{ collection.name }}</a>
+                                </li>
+                            {% endfor %}
+                            <li>
+                                <a class="add-collection" href="/collection/register">Add new collection</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/integrations">
+                            <i class="fa fa-wrench" aria-hidden="true"></i>
+                            <span class="ml-2">Integrations</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/reports">
+                            <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                            <span class="ml-2">Reports</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-sm btn-secondary ml-3 mt-2" href="#">
+                            <i class="fa fa-book" aria-hidden="true"></i>
+                            <span class="ml-2">Read the docs</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4 py-4">
+            {% block body %}
+            {% endblock %}
+
+        </main>
+    </div>
+</div>
+
+<script src="../static/js/ace/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="../static/js/ace/mode-json.js" type="text/javascript" charset="utf-8"></script>
+<script src="../static/js/jquery.js"></script>
+<script src="../static/js/template.js"></script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"
+        integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+<!-- Github buttons -->
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+{% block footer %}
+{% endblock %}
+
+</body>
+</html>
