@@ -24,7 +24,7 @@
                 {% endwith %}
             </div>
         </div>
-        {% if not results %}
+        {% if not results.get("hits", []) %}
             <hgroup class="mb20">
                 <h1>Search Results</h1>
                 <h2 class="lead"><strong class="text-danger">No</strong> results were found for the query:
@@ -33,46 +33,82 @@
         {% else %}
             <hgroup class="mb20">
                 <h1>Search Results</h1>
-                <h2 class="lead"><strong class="text-success">{{ results|length }}</strong> results were found for
-                    the query: <strong class="text-success">{{ keywords }}</strong></h2>
+                <h2 class="lead"><strong class="text-success">{{ results.get("hits", [])|length }}</strong> results
+                    were found for
+                    the query: <strong class="text-success">{{ keywords }}</strong> ({{ results.get('time', 0) }}ms)
+                </h2>
             </hgroup>
+            <div id="accordion">
+            <div class="card">
+                <div class="card-header" id="relevanceHeader">
+                    <h5 class="mb-0">
+                        <button class="relevance-toggle-btn btn btn-link" data-toggle="collapse"
+                                data-target="#collapseRelevance"
+                                aria-expanded="true" aria-controls="collapseRelevance">
+                            Relevance Metrics <i class="fa fa-fw fa-angle-down"></i>
+                        </button>
+                    </h5>
+                </div>
+                <div id="collapseRelevance" class="collapse" aria-labelledby="relevanceHeader"
+                     data-parent="#accordion">
+                    <div class="card-body d-flex flex-row  align-items-center">
+                        <div class="stars">
+                            <span class="metric">P@{{ results.get("hits", [])|length }}&nbsp&nbsp&nbsp</span>
+                        </div>
+                        <div id="precision-score" class="col-3 progress" data-label=0.0>
+                            <span class="value" style="width:0%;"></span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-row  align-items-center">
+                        <div class="stars">
+                            <span class="metric">NDCG@{{ results.get("hits", [])|length }}</span>
+                        </div>
+                        <div id="ndcg-score" class="col-3 progress" data-label=0.0>
+                            <span class="value" style="width:0%;"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row">
+
                 <div class="col-12 col-xl-12 mb-4 mb-lg-0">
                     <div class="table-responsive">
                         <table class="table">
                             <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col">Document</th>
+                                <th scope="col">Score</th>
+                            </tr>
+                            <tbody>
+                            {% for hit in results.get('hits', []) %}
                                 <tr>
-                                    <th scope="col"></th>
-                                    <th scope="col">Document</th>
-                                    <th scope="col">Score</th>
-                                </tr>
-                                <tbody>
-                                {% for hit in results.get('hits', []) %}
-                                    <tr>
-                                        <td class="col-md-2">
-                                            <select class="form-select" aria-label="Default select example">
-                                                <option selected disabled>Relevances</option>
-                                                <option class="relevant" value="1">Relevant</option>
-                                                <option class="irrelevant" value="0">Irrelevant</option>
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <div class="widget-doc-title">
-                                                Documento: <a class="open-file"
-                                                              data-url="/collection/{{ collection_name }}/{{ hit['name'] }}">{{ hit['name'] }}</a>
-                                                <p class="widget-summary">
-                                                    {% if hit['summary'] %}
+                                    <td class="col-md-2">
+                                        <select class="relevance-feedback form-select"
+                                                aria-label="Default select example"
+                                                data-position={{ hit['position'] }}>
+                                            <option selected disabled  value="-1">Relevances</option>
+                                            <option class="relevant" value="1">Relevant</option>
+                                            <option class="irrelevant" value="0">Irrelevant</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <div class="widget-doc-title">
+                                            Documento: <a class="open-file"
+                                                          data-url="/collection/{{ collection_name }}/{{ hit['name'] }}">{{ hit['name'] }}</a>
+                                            <p class="widget-summary">
+                                                {% if hit['summary'] %}
                                                     {{ hit['summary']|safe }}...
-                                                    {% endif %}
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="widget-score-salary"> {{ "%.2f"|format(hit['score']|float) }} </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="widget-score-salary"> {{ "%.2f"|format(hit['score']|float) }} </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -89,43 +125,113 @@
 
 {% block footer %}
     <script type="text/javascript">
-    $("a.open-file").click(function(){
-        $.ajax({
-            url: $(this).data("url"),
-            type: 'get',
-            success: function(response){
-                $(".file-exhibition").html(response);
-                var rdeditor = ace.edit("readonly-editor", {
-                   wrap:1
+        $("a.open-file").click(function () {
+            $.ajax({
+                url: $(this).data("url"),
+                type: 'get',
+                success: function (response) {
+                    $(".file-exhibition").html(response);
+                    var rdeditor = ace.edit("readonly-editor", {
+                        wrap: 1
+                    });
+                    var JsonMode = ace.require("ace/mode/json").Mode;
+                    rdeditor.session.setMode(new JsonMode());
+                    rdeditor.renderer.setShowGutter(false);
+                    rdeditor.setShowPrintMargin(false);
+                    rdeditor.setHighlightActiveLine(false);
+                    rdeditor.setReadOnly(true);
+                    rdeditor.setOptions({
+                        fontFamily: "IBM Plex Mono",
+                    });
+                    rdeditor.setValue(rdeditor.getValue().trim());
+                    $("#file-show").modal('show');
+                }
+            });
+        });
+
+        function updatePrecision(newPrecision) {
+            // get  the precision progress bar with the id precision-score
+            var precisionProgressBar = document.getElementById("precision-score");
+            // change the data-label to the new precision
+            precisionProgressBar.dataset.label = (newPrecision*100).toFixed(2) + "%";
+            // change the width of the span inside progress bar to the new precision
+            precisionProgressBar.children[0].style.width = (newPrecision*100) + "%";
+
+            // if the precision is lower than 30% then change the color of the progress bar to red
+            // if the precision is between 30% and 70% then change the color of the progress bar to orange
+            // if the precision is higher than 70% then change the color of the progress bar to green
+            if (newPrecision < 0.3) {
+                precisionProgressBar.children[0].style.backgroundColor = "#ff0000";
+            } else if (newPrecision >= 0.3 && newPrecision < 0.7) {
+                precisionProgressBar.children[0].style.backgroundColor = "#ffa500";
+            } else {
+                precisionProgressBar.children[0].style.backgroundColor = "#00ff00";
+            }
+        }
+
+        function updateNDCG(newNDCG) {
+            // get  the ndcg progress bar with the id ndcg-score
+            var ndcgProgressBar = document.getElementById("ndcg-score");
+            // change the data-label to the new ndcg
+            ndcgProgressBar.dataset.label = (newNDCG*100).toFixed(2) + "%";
+            // change the width of the span inside progress bar to the new precision
+            ndcgProgressBar.children[0].style.width = (newNDCG*100) + "%";
+
+            // if the ndcg is lower than 30% then change the color of the progress bar to red
+            // if the ndcg is between 30% and 70% then change the color of the progress bar to orange
+            // if the ndcg is higher than 70% then change the color of the progress bar to green
+            if (newNDCG < 0.3) {
+                ndcgProgressBar.children[0].style.backgroundColor = "#ff0000";
+            } else if (newNDCG >= 0.3 && newNDCG < 0.7) {
+                ndcgProgressBar.children[0].style.backgroundColor = "#ffa500";
+            } else {
+                ndcgProgressBar.children[0].style.backgroundColor = "#00ff00";
+            }
+        }
+
+        $(".form-select").on('click', function () {
+            const v = this.value;
+
+            var update_metrics  = false;
+
+            if (v == 0) {
+                $(this).removeClass("relevant");
+                $(this).addClass("irrelevant");
+                update_metrics = true;
+            } else if (v == 1) {
+                $(this).removeClass("irrelevant");
+                $(this).addClass("relevant");
+                update_metrics = true;
+            }
+
+            if (update_metrics) {
+                // collect all form-select values.
+                var relevance_feedback = [];
+                $(".relevance-feedback").each(function () {
+                    relevance_feedback.push(this.value);
                 });
-                var JsonMode = ace.require("ace/mode/json").Mode;
-                rdeditor.session.setMode(new JsonMode());
-                rdeditor.renderer.setShowGutter(false);
-                rdeditor.setShowPrintMargin(false);
-                rdeditor.setHighlightActiveLine(false);
-                rdeditor.setReadOnly(true);
-                rdeditor.setOptions({
-                    fontFamily: "IBM Plex Mono",
+
+                // Send the data using post and receive the metrics
+                $.ajax({
+                    url: "/eval",
+                    type: 'post',
+                    data: JSON.stringify({
+                        relevance_feedback: relevance_feedback
+                    }),
+                    contentType: 'application/json',
+                    success: function (response) {
+                        // check if the response is not empty
+                        if (response['precision'] !== undefined) {
+                            // update the precision and ndcg
+                            updatePrecision(response['precision']);
+                        }
+                        if (response['ndcg'] !== undefined) {
+                            updateNDCG(response['ndcg']);
+                        }
+                    }
                 });
-                rdeditor.setValue(rdeditor.getValue().trim());
-                $("#file-show").modal('show');
             }
         });
-    });
-
-    $(".form-select").change(function(){
-        const v =  this.value;
-
-        console.log(v);
-
-        if (v == 0) {
-            $(this).removeClass("relevant");
-            $(this).addClass("irrelevant");
-        } else {
-            $(this).removeClass("irrelevant");
-            $(this).addClass("relevant"); 
-        }
-    });
 
 
     </script>

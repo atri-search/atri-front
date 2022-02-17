@@ -24,9 +24,10 @@
 # The views and conclusions contained in the software and documentation are
 # those of the authors and should not be interpreted as representing official
 # policies, either expressed or implied, of MARCOS PONTES.
-
-from flask import render_template
+import requests
+from flask import render_template, request, flash
 from . import info_blueprint as bp
+from ..config import BASE_API_URL
 
 
 @bp.route("/docs", methods=['GET'])
@@ -37,4 +38,35 @@ def about_us():
 @bp.route("/integrations", methods=['GET'])
 def integrations():
     return render_template("integrations.html")
+
+
+@bp.route("/eval", methods=['POST'])
+def eval():
+    # receive data from ajax
+    data = request.get_json()
+    ground_truth = [int(value) if int(value) >= 0 else 0 for value in data.get('relevance_feedback', [])]
+    at_k = len(data.get('relevance_feedback', []))
+
+    precision = 0.0
+    ndcg = 0.0
+
+    if sum(ground_truth) > 0:
+
+        # evaluate data
+        try:
+            response = requests.post(BASE_API_URL + f"/eval", json={
+                "ground_truth": ground_truth,
+                "metrics": [f"precision@{at_k}", f"ndcg@{at_k}"]
+            }).json()
+
+            precision = response.get("precision@{}".format(at_k), 0.0)
+            ndcg = response.get("ndcg@{}".format(at_k), 0.0)
+
+        except requests.exceptions.RequestException:
+            flash("[ERROR] Unexpected error")
+
+    return {
+        "precision": precision,
+        "ndcg": ndcg
+    }
 
