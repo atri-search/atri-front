@@ -75,7 +75,7 @@ def search_text():
 
 @bp.route("/reports", methods=['GET'])
 def reports():
-    return render_template("reports.html")
+    return render_template("qrel.html")
 
 
 @bp.route("/search/file", methods=['POST'])
@@ -138,7 +138,23 @@ def search(collection_name, *, keywords=None, file_search=None, **kwargs):
     json_response = response.json()
 
     if 'reports' in json_response:
-        return render_template("qrel.html", reports=json_response['reports'])
+        # group reports by metric
+        reports_by_metric = {}
+        try:
+            for metrics in json_response['reports'].values():
+                # metric: {'labels': [], 'values': []}
+                for metric, value in metrics.items():
+                    # split metric by @
+                    metric_name = metric.split('@')[0]
+                    if metric_name not in reports_by_metric:
+                        reports_by_metric[metric_name] = {'labels': [], 'values': []}
+                    reports_by_metric[metric_name]['labels'].append(metric.split('@')[1])
+                    reports_by_metric[metric_name]['values'].append(value)
+        except Exception as e:
+            flash(f"[ERROR] {e}")
+            return render_template("error.html")
+
+        return render_template("reports.html", qrel=list(json_response['reports'].keys())[0], reports=reports_by_metric)
 
     return render_template("relevant.html", results=json_response, keywords=keywords if keywords else
                            [f[1][0] for f in file_search],  # Get the file names

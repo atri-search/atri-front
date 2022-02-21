@@ -35,11 +35,6 @@ def about_us():
     return render_template("index.html")
 
 
-@bp.route("/integrations", methods=['GET'])
-def integrations():
-    return render_template("integrations.html")
-
-
 @bp.route("/eval", methods=['POST'])
 def eval():
     # receive data from ajax

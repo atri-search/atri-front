@@ -1,7 +1,21 @@
 {% extends 'site_template.html' %}
 
 {% block body %}
-
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    {% if '[ERROR]' in message %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ message }}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 		<div id="notfound">
 			<div class="notfound">
 				<h2>Error</h2>

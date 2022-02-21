@@ -2,93 +2,208 @@
 
 {% block imports %}
     <link href="../static/css/my_css/search.css" rel="stylesheet">
+
 {% endblock %}
 
 {% block body %}
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                {% if '[ERROR]' in message %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ message }}
-                    </div>
-                {% else %}
-                    <div class="alert alert-info" role="alert">
-                        {{ message }}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
 
+    <div id="page-wrapper">
+        <div class="container-fluid">
 
-    <form enctype="multipart/form-data" role="form" id="search-form" action="/search/file" method="post">
-        <div id="page-wrapper-search">
-            <div class="alert alert-info" role="alert">
-                Remember to configure your search with "multiquery": true.
-            </div>
-            <div class="container">
-                <div class="search-logo">
-                    reports <img src="../static/img/icon.svg" alt="Project logo" class="project-icon">
-                </div>
-                <div class="row height d-flex justify-content-center align-items-center">
-                    <div class="col-md-8">
-                        <div class="file-search">
-                            <div class="file">Select a qrel file: <input form="search-form" type="file" name="file"></div>
-                            {% if not macro_collections() %}
+            <!-- Page Heading -->
+            <div class="row">
+                <div class="col-lg-12">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
                                 <div class="alert alert-info" role="alert">
-                                    You don't have a collection to make queries. Create one <a
-                                        href="/collection/register">here</a>.
+                                    {{ message }}
                                 </div>
-                            {% else %}
-                                <select form="search-form" name="collection" class="form-control" id="collection">
-                                    {% if collection_name==null %}
-                                        <option selected="selected" disabled> Corpus</option>
-                                    {% endif %}
-                                    {% for collection in macro_collections() %}
-                                        {% if collection_name==collection.name %}
-                                            <option value="{{ collection.name }}" selected>
-                                                {{ collection.name }}
-                                            </option>
-                                        {% else %}
-                                            <option value="{{ collection.name }}">
-                                                {{ collection.name }}
-                                            </option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                            {% endif %}
-                            <button class="btn btn-primary" type="submit">Search</button>
-                            {% if collection_name %}
-                                <button id="cog" class="btn btn-primary" type="button" data-bs-toggle="modal"
-                                        data-bs-target="#advancedSearchModal" data-target="#advancedSearch"
-                                        aria-expanded="false" aria-controls="collapseExample"
-                                        data-url="/collection/{{ collection_name }}/defaults">
-                                    <i class="fa fa-cog"></i>
-                                </button>
-                            {% else %}
-                                <button id="cog" class="btn btn-primary" type="button" data-bs-toggle="modal"
-                                        data-bs-target="#advancedSearchModal" disabled>
-                                    <i class="fa fa-cog"></i>
-                                </button>
-                            {% endif %}
-                        </div>
-                    </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
                 </div>
             </div>
-            <br/><br/>
+            <hgroup class="mb20">
+                <h1>Query Reports</h1>
+            </hgroup>
+            <div class="row">
+                <div class="col-12 col-xl-12 mb-4 mb-lg-0">
+                    <br>
+                    <hr>
+                    <br>
+                    <hgroup class="mb20">
+                        <h3 style="font-weight: bold"> Search: {{ qrel }}</h3>
+                        <h5> Metrics available: {{ reports.keys()|list }} </h5>
+                        {% if 'precision' in reports.keys() %}
+                            <canvas id="precision-chart" width="100" height="50"></canvas>
+                            <button id="downloadPrecision">Download Precision Data as CSV</button>
+                        {% endif %}
+                        {% if 'ndcg' in reports.keys() %}
+                            <canvas id="ndcg-chart" width="100" height="50"></canvas>
+                            <button id="downloadNDCG">Download NDCG Data as CSV</button>
+                        {% endif %}
+                    </hgroup>
+                </div>
+            </div>
         </div>
-        <!--Advanced Config-->
-        <div class="advanced-exhibition">
-            {% include "advanced.html" %}
-        </div>
-    </form>
+    </div>
 
-
+    <!--Exibição do arquivo-->
+    <div class="file-exhibition">
+        {% include "file-show.html" %}
+    </div>
 {% endblock %}
 
 {% block footer %}
 
-    <script src="../static/js/my_js/index.js"></script>
+    <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+    </script>
 
+    <script type="text/javascript">
+
+        function sortLabelData(labels, data) {
+            const labelDataZipped = labels.map(function (e, i) {
+                return {
+                    label: e,
+                    data: data[i]
+                }
+            });
+            const sortedLabelData = labelDataZipped.sort(function (a, b) {
+                return parseInt(a.label) > parseInt(b.label);
+            });
+            const newArrayLabel = sortedLabelData.map(function (e) {
+                return e.label;
+            });
+
+            const newArrayData = sortedLabelData.map(function (e) {
+                return e.data;
+            });
+
+            return [newArrayLabel, newArrayData];
+        }
+
+        {% if 'precision' in reports %}
+            const precisionLabels = {{ reports['precision']['labels']|list|safe }};
+            const precisionData = {{ reports['precision']['values']|list|safe }};
+
+            const [precisionLabelsSorted, precisionDataSorted] = sortLabelData(precisionLabels, precisionData);
+
+            const precisionChart = new Chart(document.getElementById("precision-chart"), {
+                type: 'line',
+                data: {
+                    labels: precisionLabelsSorted,
+                    datasets: [{
+                        data: precisionDataSorted,
+                        label: "Precision",
+                        borderColor: "#3e95cd",
+                        fill: true
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'P@K'
+                    },
+                    responsive: true,
+                }
+            });
+            precisionChart.render();
+            document.getElementById("downloadPrecision").addEventListener("click", function () {
+                downloadCSV({filename: "precision-data.csv", chart: precisionChart})
+            });
+        {% endif %}
+
+        {% if 'ndcg' in reports %}
+            const ndcgLabels = {{ reports['ndcg']['labels']|list|safe }};
+            const ndcgData = {{ reports['ndcg']['values']|list|safe }};
+
+            const [ndcgLabelsSorted, ndcgDataSorted] = sortLabelData(ndcgLabels, ndcgData);
+
+            const ndcgChart = new Chart(document.getElementById("ndcg-chart"), {
+                type: 'line',
+                data: {
+                    labels: ndcgLabelsSorted,
+                    datasets: [{
+                        data: ndcgDataSorted,
+                        label: "NDCG",
+                        borderColor: "#8e5ea2",
+                        fill: true
+                    }]
+                },
+                options: {
+                    title: {
+                        display: true,
+                        text: 'NDCG@K'
+                    },
+                    responsive: true,
+                }
+            });
+            ndcgChart.render();
+            document.getElementById("downloadNDCG").addEventListener("click", function () {
+                downloadCSV({filename: "ndcg-data.csv", chart: ndcgChart})
+            });
+        {% endif %}
+
+        function convertChartDataToCSV(args) {
+            var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+
+            data = args.data || null;
+            if (data == null || !data.length) {
+                return null;
+            }
+
+            columnDelimiter = args.columnDelimiter || ',';
+            lineDelimiter = args.lineDelimiter || '\n';
+
+            keys = Object.keys(data[0]);
+
+            result = '';
+            result += keys.join(columnDelimiter);
+            result += lineDelimiter;
+
+            data.forEach(function (item) {
+                ctr = 0;
+                keys.forEach(function (key) {
+                    if (ctr > 0) result += columnDelimiter;
+                    result += item[key];
+                    ctr++;
+                });
+                result += lineDelimiter;
+            });
+            return result;
+        }
+
+        function downloadCSV(args) {
+            var csvData, filename, link;
+            var csv = "";
+
+            var data = [];
+            data.push(args.chart.data.labels);
+            for (var i = 0; i < args.chart.data.datasets.length; i++) {
+                data.push(args.chart.data.datasets[i].data);
+                csv += convertChartDataToCSV({
+                    data: data,
+                });
+            }
+            if (csv == null) return;
+
+            filename = args.filename || 'chart-data.csv';
+
+            if (!csv.match(/^data:text\/csv/i)) {
+                csv = 'data:text/csv;charset=utf-8,' + csv;
+            }
+
+            csvData = encodeURI(csv);
+            link = document.createElement('a');
+            link.setAttribute('href', csvData);
+            link.setAttribute('download', filename);
+            document.body.appendChild(link); // Required for FF
+            link.click();
+            document.body.removeChild(link);
+        }
+
+
+    </script>
 {% endblock %}
